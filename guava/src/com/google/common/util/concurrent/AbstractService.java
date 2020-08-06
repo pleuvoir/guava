@@ -27,7 +27,6 @@ import static com.google.common.util.concurrent.Service.State.TERMINATED;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.util.concurrent.Monitor.Guard;
-import com.google.common.util.concurrent.Service.State; // javadoc needs this
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
@@ -50,6 +49,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @GwtIncompatible
 public abstract class AbstractService implements Service {
+
   private static final ListenerCallQueue.Event<Listener> STARTING_EVENT =
       new ListenerCallQueue.Event<Listener>() {
         @Override
@@ -122,6 +122,7 @@ public abstract class AbstractService implements Service {
 
   @WeakOuter
   private final class IsStartableGuard extends Guard {
+
     IsStartableGuard() {
       super(AbstractService.this.monitor);
     }
@@ -136,6 +137,7 @@ public abstract class AbstractService implements Service {
 
   @WeakOuter
   private final class IsStoppableGuard extends Guard {
+
     IsStoppableGuard() {
       super(AbstractService.this.monitor);
     }
@@ -150,6 +152,7 @@ public abstract class AbstractService implements Service {
 
   @WeakOuter
   private final class HasReachedRunningGuard extends Guard {
+
     HasReachedRunningGuard() {
       super(AbstractService.this.monitor);
     }
@@ -164,6 +167,7 @@ public abstract class AbstractService implements Service {
 
   @WeakOuter
   private final class IsStoppedGuard extends Guard {
+
     IsStoppedGuard() {
       super(AbstractService.this.monitor);
     }
@@ -174,7 +178,9 @@ public abstract class AbstractService implements Service {
     }
   }
 
-  /** The listeners to notify during a state transition. */
+  /**
+   * The listeners to notify during a state transition.
+   */
   private final ListenerCallQueue<Listener> listeners = new ListenerCallQueue<>();
 
   /**
@@ -188,8 +194,11 @@ public abstract class AbstractService implements Service {
    */
   private volatile StateSnapshot snapshot = new StateSnapshot(NEW);
 
-  /** Constructor for use by subclasses. */
-  protected AbstractService() {}
+  /**
+   * Constructor for use by subclasses.
+   */
+  protected AbstractService() {
+  }
 
   /**
    * This method is called by {@link #startAsync} to initiate service startup. The invocation of
@@ -230,14 +239,15 @@ public abstract class AbstractService implements Service {
    * convenient. It is invoked exactly once on service shutdown, even when {@link #stopAsync} is
    * called multiple times.
    *
-   * <p>When this method is called {@link #state()} will return {@link State#STOPPING}, which is the
-   * external state observable by the caller of {@link #stopAsync}.
+   * <p>When this method is called {@link #state()} will return {@link State#STOPPING}, which is
+   * the external state observable by the caller of {@link #stopAsync}.
    *
    * @since 27.0
    */
   @Beta
   @ForOverride
-  protected void doCancelStart() {}
+  protected void doCancelStart() {
+  }
 
   @CanIgnoreReturnValue
   @Override
@@ -306,7 +316,9 @@ public abstract class AbstractService implements Service {
     }
   }
 
-  /** @since 28.0 */
+  /**
+   * @since 28.0
+   */
   @Override
   public final void awaitRunning(Duration timeout) throws TimeoutException {
     Service.super.awaitRunning(timeout);
@@ -339,7 +351,9 @@ public abstract class AbstractService implements Service {
     }
   }
 
-  /** @since 28.0 */
+  /**
+   * @since 28.0
+   */
   @Override
   public final void awaitTerminated(Duration timeout) throws TimeoutException {
     Service.super.awaitTerminated(timeout);
@@ -367,7 +381,9 @@ public abstract class AbstractService implements Service {
     }
   }
 
-  /** Checks that the current state is equal to the expected state. */
+  /**
+   * Checks that the current state is equal to the expected state.
+   */
   @GuardedBy("monitor")
   private void checkCurrentState(State expected) {
     State actual = state();
@@ -423,7 +439,7 @@ public abstract class AbstractService implements Service {
    * State#TERMINATED}.
    *
    * @throws IllegalStateException if the service is not one of {@link State#STOPPING}, {@link
-   *     State#STARTING}, or {@link State#RUNNING}.
+   *                               State#STARTING}, or {@link State#RUNNING}.
    */
   protected final void notifyStopped() {
     monitor.enter();
@@ -449,8 +465,8 @@ public abstract class AbstractService implements Service {
 
   /**
    * Invoke this method to transition the service to the {@link State#FAILED}. The service will
-   * <b>not be stopped</b> if it is running. Invoke this method when a service has failed critically
-   * or otherwise cannot be started nor stopped.
+   * <b>not be stopped</b> if it is running. Invoke this method when a service has failed
+   * critically or otherwise cannot be started nor stopped.
    */
   protected final void notifyFailed(Throwable cause) {
     checkNotNull(cause);
@@ -488,13 +504,17 @@ public abstract class AbstractService implements Service {
     return snapshot.externalState();
   }
 
-  /** @since 14.0 */
+  /**
+   * @since 14.0
+   */
   @Override
   public final Throwable failureCause() {
     return snapshot.failureCause();
   }
 
-  /** @since 13.0 */
+  /**
+   * @since 13.0
+   */
   @Override
   public final void addListener(Listener listener, Executor executor) {
     listeners.addListener(listener, executor);
@@ -576,12 +596,15 @@ public abstract class AbstractService implements Service {
    */
   // @Immutable except that Throwable is mutable (initCause(), setStackTrace(), mutable subclasses).
   private static final class StateSnapshot {
+
     /**
      * The internal state, which equals external state unless shutdownWhenStartupFinishes is true.
      */
     final State state;
 
-    /** If true, the user requested a shutdown while the service was still starting up. */
+    /**
+     * If true, the user requested a shutdown while the service was still starting up.
+     */
     final boolean shutdownWhenStartupFinishes;
 
     /**
@@ -611,7 +634,9 @@ public abstract class AbstractService implements Service {
       this.failure = failure;
     }
 
-    /** @see Service#state() */
+    /**
+     * @see Service#state()
+     */
     State externalState() {
       if (shutdownWhenStartupFinishes && state == STARTING) {
         return STOPPING;
@@ -620,7 +645,9 @@ public abstract class AbstractService implements Service {
       }
     }
 
-    /** @see Service#failureCause() */
+    /**
+     * @see Service#failureCause()
+     */
     Throwable failureCause() {
       checkState(
           state == FAILED,

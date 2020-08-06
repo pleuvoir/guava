@@ -54,7 +54,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Futures#catching(ListenableFuture, Class, com.google.common.base.Function,
  * java.util.concurrent.Executor) Futures.catching}.
  *
- * <p>This class implements all methods in {@code ListenableFuture}. Subclasses should provide a way
+ * <p>This class implements all methods in {@code ListenableFuture}. Subclasses should provide a
+ * way
  * to set the result of the computation through the protected methods {@link #set(Object)}, {@link
  * #setFuture(ListenableFuture)} and {@link #setException(Throwable)}. Subclasses may also override
  * {@link #afterDone()}, which will be invoked automatically when the future completes. Subclasses
@@ -91,13 +92,16 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
    * of this interface must also be an AbstractFuture and must not override or expose for overriding
    * any of the public methods of ListenableFuture.
    */
-  interface Trusted<V> extends ListenableFuture<V> {}
+  interface Trusted<V> extends ListenableFuture<V> {
+
+  }
 
   /**
    * A less abstract subclass of AbstractFuture. This can be used to optimize setFuture by ensuring
    * that {@link #get} calls exactly the implementation of {@link AbstractFuture#get}.
    */
   abstract static class TrustedFuture<V> extends AbstractFuture<V> implements Trusted<V> {
+
     @CanIgnoreReturnValue
     @Override
     public final V get() throws InterruptedException, ExecutionException {
@@ -187,8 +191,11 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
     }
   }
 
-  /** Waiter links form a Treiber stack, in the {@link #waiters} field. */
+  /**
+   * Waiter links form a Treiber stack, in the {@link #waiters} field.
+   */
   private static final class Waiter {
+
     static final Waiter TOMBSTONE = new Waiter(false /* ignored param */);
 
     volatile @Nullable Thread thread;
@@ -198,7 +205,8 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
      * Constructor for the TOMBSTONE, avoids use of ATOMIC_HELPER in case this class is loaded
      * before the ATOMIC_HELPER. Apparently this is possible on some android platforms.
      */
-    Waiter(boolean unused) {}
+    Waiter(boolean unused) {
+    }
 
     Waiter() {
       // avoid volatile write, write is made visible by subsequent CAS on waiters field
@@ -262,8 +270,11 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
     }
   }
 
-  /** Listeners also form a stack through the {@link #listeners} field. */
+  /**
+   * Listeners also form a stack through the {@link #listeners} field.
+   */
   private static final class Listener {
+
     static final Listener TOMBSTONE = new Listener(null, null);
     final Runnable task;
     final Executor executor;
@@ -277,11 +288,16 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
     }
   }
 
-  /** A special value to represent {@code null}. */
+  /**
+   * A special value to represent {@code null}.
+   */
   private static final Object NULL = new Object();
 
-  /** A special value to represent failure, when {@link #setException} is called successfully. */
+  /**
+   * A special value to represent failure, when {@link #setException} is called successfully.
+   */
   private static final class Failure {
+
     static final Failure FALLBACK_INSTANCE =
         new Failure(
             new Throwable("Failure occurred while trying to finish a future.") {
@@ -297,8 +313,11 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
     }
   }
 
-  /** A special value to represent cancellation and the 'wasInterrupted' bit. */
+  /**
+   * A special value to represent cancellation and the 'wasInterrupted' bit.
+   */
   private static final class Cancellation {
+
     // constants to use when GENERATE_CANCELLATION_CAUSES = false
     static final Cancellation CAUSELESS_INTERRUPTED;
     static final Cancellation CAUSELESS_CANCELLED;
@@ -322,8 +341,11 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
     }
   }
 
-  /** A special value that encodes the 'setFuture' state. */
+  /**
+   * A special value that encodes the 'setFuture' state.
+   */
   private static final class SetFuture<V> implements Runnable {
+
     final AbstractFuture<V> owner;
     final ListenableFuture<? extends V> future;
 
@@ -364,14 +386,21 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
    */
   private volatile @Nullable Object value;
 
-  /** All listeners. */
+  /**
+   * All listeners.
+   */
   private volatile @Nullable Listener listeners;
 
-  /** All waiting threads. */
+  /**
+   * All waiting threads.
+   */
   private volatile @Nullable Waiter waiters;
 
-  /** Constructor for use by subclasses. */
-  protected AbstractFuture() {}
+  /**
+   * Constructor for use by subclasses.
+   */
+  protected AbstractFuture() {
+  }
 
   // Gets and Timed Gets
   //
@@ -400,7 +429,8 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
   /**
    * {@inheritDoc}
    *
-   * <p>The default {@link AbstractFuture} implementation throws {@code InterruptedException} if the
+   * <p>The default {@link AbstractFuture} implementation throws {@code InterruptedException} if
+   * the
    * current thread is interrupted during the call, even if the value is already available.
    *
    * @throws CancellationException {@inheritDoc}
@@ -511,7 +541,8 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
   /**
    * {@inheritDoc}
    *
-   * <p>The default {@link AbstractFuture} implementation throws {@code InterruptedException} if the
+   * <p>The default {@link AbstractFuture} implementation throws {@code InterruptedException} if
+   * the
    * current thread is interrupted during the call, even if the value is already available.
    *
    * @throws CancellationException {@inheritDoc}
@@ -556,7 +587,9 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
     return getDoneValue(value);
   }
 
-  /** Unboxes {@code obj}. Assumes that obj is not {@code null} or a {@link SetFuture}. */
+  /**
+   * Unboxes {@code obj}. Assumes that obj is not {@code null} or a {@link SetFuture}.
+   */
   private V getDoneValue(Object obj) throws ExecutionException {
     // While this seems like it might be too branch-y, simple benchmarking proves it to be
     // unmeasurable (comparing done AbstractFutures with immediateFuture)
@@ -568,7 +601,7 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
       return null;
     } else {
       @SuppressWarnings("unchecked") // this is the only other option
-      V asV = (V) obj;
+          V asV = (V) obj;
       return asV;
     }
   }
@@ -675,7 +708,8 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
    *
    * @since 10.0
    */
-  protected void interruptTask() {}
+  protected void interruptTask() {
+  }
 
   /**
    * Returns true if this future was cancelled with {@code mayInterruptIfRunning} set to {@code
@@ -800,7 +834,7 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
    *
    * @param future the future to delegate to
    * @return true if the attempt was accepted, indicating that the {@code Future} was not previously
-   *     cancelled or set.
+   * cancelled or set.
    * @since 19.0
    */
   @CanIgnoreReturnValue
@@ -945,7 +979,9 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
     }
   }
 
-  /** Unblocks all threads and runs all listeners. */
+  /**
+   * Unblocks all threads and runs all listeners.
+   */
   private static void complete(AbstractFuture<?> future) {
     Listener next = null;
     outer:
@@ -1000,9 +1036,11 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
    */
   @Beta
   @ForOverride
-  protected void afterDone() {}
+  protected void afterDone() {
+  }
 
   // TODO(b/114236866): Inherit doc from InternalFutureFailureAccess. Also, -link to its URL.
+
   /**
    * Usually returns {@code null} but, if this {@code Future} has failed, may <i>optionally</i>
    * return the cause of the failure. "Failure" means specifically "completed with an exception"; it
@@ -1044,7 +1082,9 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
     }
   }
 
-  /** Releases all threads in the {@link #waiters} list, and clears the list. */
+  /**
+   * Releases all threads in the {@link #waiters} list, and clears the list.
+   */
   private void releaseWaiters() {
     Waiter head;
     do {
@@ -1167,7 +1207,9 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
     }
   }
 
-  /** Helper for printing user supplied objects into our toString method. */
+  /**
+   * Helper for printing user supplied objects into our toString method.
+   */
   private void appendUserObject(StringBuilder builder, Object o) {
     // This is some basic recursion detection for when people create cycles via set/setFuture or
     // when deep chains of futures exist resulting in a StackOverflowException. We could detect
@@ -1205,19 +1247,30 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
   }
 
   private abstract static class AtomicHelper {
-    /** Non volatile write of the thread to the {@link Waiter#thread} field. */
+
+    /**
+     * Non volatile write of the thread to the {@link Waiter#thread} field.
+     */
     abstract void putThread(Waiter waiter, Thread newValue);
 
-    /** Non volatile write of the waiter to the {@link Waiter#next} field. */
+    /**
+     * Non volatile write of the waiter to the {@link Waiter#next} field.
+     */
     abstract void putNext(Waiter waiter, Waiter newValue);
 
-    /** Performs a CAS operation on the {@link #waiters} field. */
+    /**
+     * Performs a CAS operation on the {@link #waiters} field.
+     */
     abstract boolean casWaiters(AbstractFuture<?> future, Waiter expect, Waiter update);
 
-    /** Performs a CAS operation on the {@link #listeners} field. */
+    /**
+     * Performs a CAS operation on the {@link #listeners} field.
+     */
     abstract boolean casListeners(AbstractFuture<?> future, Listener expect, Listener update);
 
-    /** Performs a CAS operation on the {@link #value} field. */
+    /**
+     * Performs a CAS operation on the {@link #value} field.
+     */
     abstract boolean casValue(AbstractFuture<?> future, Object expect, Object update);
   }
 
@@ -1228,6 +1281,7 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
    * be accessed.
    */
   private static final class UnsafeAtomicHelper extends AtomicHelper {
+
     static final sun.misc.Unsafe UNSAFE;
     static final long LISTENERS_OFFSET;
     static final long WAITERS_OFFSET;
@@ -1285,27 +1339,36 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
       UNSAFE.putObject(waiter, WAITER_NEXT_OFFSET, newValue);
     }
 
-    /** Performs a CAS operation on the {@link #waiters} field. */
+    /**
+     * Performs a CAS operation on the {@link #waiters} field.
+     */
     @Override
     boolean casWaiters(AbstractFuture<?> future, Waiter expect, Waiter update) {
       return UNSAFE.compareAndSwapObject(future, WAITERS_OFFSET, expect, update);
     }
 
-    /** Performs a CAS operation on the {@link #listeners} field. */
+    /**
+     * Performs a CAS operation on the {@link #listeners} field.
+     */
     @Override
     boolean casListeners(AbstractFuture<?> future, Listener expect, Listener update) {
       return UNSAFE.compareAndSwapObject(future, LISTENERS_OFFSET, expect, update);
     }
 
-    /** Performs a CAS operation on the {@link #value} field. */
+    /**
+     * Performs a CAS operation on the {@link #value} field.
+     */
     @Override
     boolean casValue(AbstractFuture<?> future, Object expect, Object update) {
       return UNSAFE.compareAndSwapObject(future, VALUE_OFFSET, expect, update);
     }
   }
 
-  /** {@link AtomicHelper} based on {@link AtomicReferenceFieldUpdater}. */
+  /**
+   * {@link AtomicHelper} based on {@link AtomicReferenceFieldUpdater}.
+   */
   private static final class SafeAtomicHelper extends AtomicHelper {
+
     final AtomicReferenceFieldUpdater<Waiter, Thread> waiterThreadUpdater;
     final AtomicReferenceFieldUpdater<Waiter, Waiter> waiterNextUpdater;
     final AtomicReferenceFieldUpdater<AbstractFuture, Waiter> waitersUpdater;
@@ -1354,10 +1417,12 @@ public abstract class AbstractFuture<V> extends InternalFutureFailureAccess
   /**
    * {@link AtomicHelper} based on {@code synchronized} and volatile writes.
    *
-   * <p>This is an implementation of last resort for when certain basic VM features are broken (like
+   * <p>This is an implementation of last resort for when certain basic VM features are broken
+   * (like
    * AtomicReferenceFieldUpdater).
    */
   private static final class SynchronizedHelper extends AtomicHelper {
+
     @Override
     void putThread(Waiter waiter, Thread newValue) {
       waiter.thread = newValue;

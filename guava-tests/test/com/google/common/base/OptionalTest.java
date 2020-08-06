@@ -37,6 +37,7 @@ import junit.framework.TestCase;
  */
 @GwtCompatible(emulated = true)
 public final class OptionalTest extends TestCase {
+
   public void testToJavaUtil_static() {
     assertNull(Optional.toJavaUtil(null));
     assertEquals(java.util.Optional.empty(), Optional.toJavaUtil(Optional.absent()));
@@ -305,7 +306,7 @@ public final class OptionalTest extends TestCase {
     // Sadly, the following is what users will have to do in some circumstances.
 
     @SuppressWarnings("unchecked") // safe covariant cast
-    Optional<Number> first = (Optional<Number>) numbers.first();
+        Optional<Number> first = (Optional<Number>) numbers.first();
     Number value = first.or(0.5); // fine
   }
 

@@ -63,7 +63,7 @@ import java.util.concurrent.TimeoutException;
  * href="https://github.com/lukas-krecan/future-converter">Future Converter</a>.)
  *
  * <h3>Extension</h3>
- *
+ * <p>
  * If you want a class like {@code FluentFuture} but with extra methods, we recommend declaring your
  * own subclass of {@link ListenableFuture}, complete with a method like {@link #from} to adapt an
  * existing {@code ListenableFuture}, implemented atop a {@link ForwardingListenableFuture} that
@@ -80,8 +80,9 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    * A less abstract subclass of AbstractFuture. This can be used to optimize setFuture by ensuring
    * that {@link #get} calls exactly the implementation of {@link AbstractFuture#get}.
    */
-  abstract static class TrustedFuture<V> extends FluentFuture<V>
-      implements AbstractFuture.Trusted<V> {
+  abstract static class TrustedFuture<V> extends FluentFuture<V> implements
+      AbstractFuture.Trusted<V> {
+
     @CanIgnoreReturnValue
     @Override
     public final V get() throws InterruptedException, ExecutionException {
@@ -117,7 +118,8 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
     }
   }
 
-  FluentFuture() {}
+  FluentFuture() {
+  }
 
   /**
    * Converts the given {@code ListenableFuture} to an equivalent {@code FluentFuture}.
@@ -135,8 +137,8 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
   /**
    * Simply returns its argument.
    *
-   * @deprecated no need to use this
    * @since 28.0
+   * @deprecated no need to use this
    */
   @Deprecated
   public static <V> FluentFuture<V> from(FluentFuture<V> future) {
@@ -159,9 +161,9 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    *     fetchCounters().catching(FetchException.class, x -> 0, directExecutor());
    * }</pre>
    *
-   * <p>When selecting an executor, note that {@code directExecutor} is dangerous in some cases. See
-   * the discussion in the {@link #addListener} documentation. All its warnings about heavyweight
-   * listeners are also applicable to heavyweight functions passed to this method.
+   * <p>When selecting an executor, note that {@code directExecutor} is dangerous in some cases.
+   * See the discussion in the {@link #addListener} documentation. All its warnings about
+   * heavyweight listeners are also applicable to heavyweight functions passed to this method.
    *
    * <p>This method is similar to {@link java.util.concurrent.CompletableFuture#exceptionally}. It
    * can also serve some of the use cases of {@link java.util.concurrent.CompletableFuture#handle}
@@ -169,16 +171,18 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    * #transform}.
    *
    * @param exceptionType the exception type that triggers use of {@code fallback}. The exception
-   *     type is matched against the input's exception. "The input's exception" means the cause of
-   *     the {@link ExecutionException} thrown by {@code input.get()} or, if {@code get()} throws a
-   *     different kind of exception, that exception itself. To avoid hiding bugs and other
-   *     unrecoverable errors, callers should prefer more specific types, avoiding {@code
-   *     Throwable.class} in particular.
-   * @param fallback the {@link Function} to be called if the input fails with the expected
-   *     exception type. The function's argument is the input's exception. "The input's exception"
-   *     means the cause of the {@link ExecutionException} thrown by {@code this.get()} or, if
-   *     {@code get()} throws a different kind of exception, that exception itself.
-   * @param executor the executor that runs {@code fallback} if the input fails
+   *                      type is matched against the input's exception. "The input's exception"
+   *                      means the cause of the {@link ExecutionException} thrown by {@code
+   *                      input.get()} or, if {@code get()} throws a different kind of exception,
+   *                      that exception itself. To avoid hiding bugs and other unrecoverable
+   *                      errors, callers should prefer more specific types, avoiding {@code
+   *                      Throwable.class} in particular.
+   * @param fallback      the {@link Function} to be called if the input fails with the expected
+   *                      exception type. The function's argument is the input's exception. "The
+   *                      input's exception" means the cause of the {@link ExecutionException}
+   *                      thrown by {@code this.get()} or, if {@code get()} throws a different kind
+   *                      of exception, that exception itself.
+   * @param executor      the executor that runs {@code fallback} if the input fails
    */
   @Partially.GwtIncompatible("AVAILABLE but requires exceptionType to be Throwable.class")
   public final <X extends Throwable> FluentFuture<V> catching(
@@ -220,12 +224,12 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    *         directExecutor());
    * }</pre>
    *
-   * <p>When selecting an executor, note that {@code directExecutor} is dangerous in some cases. See
-   * the discussion in the {@link #addListener} documentation. All its warnings about heavyweight
-   * listeners are also applicable to heavyweight functions passed to this method. (Specifically,
-   * {@code directExecutor} functions should avoid heavyweight operations inside {@code
-   * AsyncFunction.apply}. Any heavyweight operations should occur in other threads responsible for
-   * completing the returned {@code Future}.)
+   * <p>When selecting an executor, note that {@code directExecutor} is dangerous in some cases.
+   * See the discussion in the {@link #addListener} documentation. All its warnings about
+   * heavyweight listeners are also applicable to heavyweight functions passed to this method.
+   * (Specifically, {@code directExecutor} functions should avoid heavyweight operations inside
+   * {@code AsyncFunction.apply}. Any heavyweight operations should occur in other threads
+   * responsible for completing the returned {@code Future}.)
    *
    * <p>This method is similar to {@link java.util.concurrent.CompletableFuture#exceptionally}. It
    * can also serve some of the use cases of {@link java.util.concurrent.CompletableFuture#handle}
@@ -233,16 +237,18 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    * #transform}.
    *
    * @param exceptionType the exception type that triggers use of {@code fallback}. The exception
-   *     type is matched against the input's exception. "The input's exception" means the cause of
-   *     the {@link ExecutionException} thrown by {@code this.get()} or, if {@code get()} throws a
-   *     different kind of exception, that exception itself. To avoid hiding bugs and other
-   *     unrecoverable errors, callers should prefer more specific types, avoiding {@code
-   *     Throwable.class} in particular.
-   * @param fallback the {@link AsyncFunction} to be called if the input fails with the expected
-   *     exception type. The function's argument is the input's exception. "The input's exception"
-   *     means the cause of the {@link ExecutionException} thrown by {@code input.get()} or, if
-   *     {@code get()} throws a different kind of exception, that exception itself.
-   * @param executor the executor that runs {@code fallback} if the input fails
+   *                      type is matched against the input's exception. "The input's exception"
+   *                      means the cause of the {@link ExecutionException} thrown by {@code
+   *                      this.get()} or, if {@code get()} throws a different kind of exception,
+   *                      that exception itself. To avoid hiding bugs and other unrecoverable
+   *                      errors, callers should prefer more specific types, avoiding {@code
+   *                      Throwable.class} in particular.
+   * @param fallback      the {@link AsyncFunction} to be called if the input fails with the
+   *                      expected exception type. The function's argument is the input's exception.
+   *                      "The input's exception" means the cause of the {@link ExecutionException}
+   *                      thrown by {@code input.get()} or, if {@code get()} throws a different kind
+   *                      of exception, that exception itself.
+   * @param executor      the executor that runs {@code fallback} if the input fails
    */
   @Partially.GwtIncompatible("AVAILABLE but requires exceptionType to be Throwable.class")
   public final <X extends Throwable> FluentFuture<V> catchingAsync(
@@ -256,7 +262,7 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    * If the timeout expires, not only will the output future finish, but also the input future
    * ({@code this}) will be cancelled and interrupted.
    *
-   * @param timeout when to time out the future
+   * @param timeout           when to time out the future
    * @param scheduledExecutor The executor service to enforce the timeout.
    * @since 28.0
    */
@@ -272,8 +278,8 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    * If the timeout expires, not only will the output future finish, but also the input future
    * ({@code this}) will be cancelled and interrupted.
    *
-   * @param timeout when to time out the future
-   * @param unit the time unit of the time parameter
+   * @param timeout           when to time out the future
+   * @param unit              the time unit of the time parameter
    * @param scheduledExecutor The executor service to enforce the timeout.
    */
   @GwtIncompatible // ScheduledExecutorService
@@ -298,18 +304,18 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    *     rowKeyFuture.transformAsync(dataService::readFuture, executor);
    * }</pre>
    *
-   * <p>When selecting an executor, note that {@code directExecutor} is dangerous in some cases. See
-   * the discussion in the {@link #addListener} documentation. All its warnings about heavyweight
-   * listeners are also applicable to heavyweight functions passed to this method. (Specifically,
-   * {@code directExecutor} functions should avoid heavyweight operations inside {@code
-   * AsyncFunction.apply}. Any heavyweight operations should occur in other threads responsible for
-   * completing the returned {@code Future}.)
+   * <p>When selecting an executor, note that {@code directExecutor} is dangerous in some cases.
+   * See the discussion in the {@link #addListener} documentation. All its warnings about
+   * heavyweight listeners are also applicable to heavyweight functions passed to this method.
+   * (Specifically, {@code directExecutor} functions should avoid heavyweight operations inside
+   * {@code AsyncFunction.apply}. Any heavyweight operations should occur in other threads
+   * responsible for completing the returned {@code Future}.)
    *
-   * <p>The returned {@code Future} attempts to keep its cancellation state in sync with that of the
-   * input future and that of the future returned by the chain function. That is, if the returned
-   * {@code Future} is cancelled, it will attempt to cancel the other two, and if either of the
-   * other two is cancelled, the returned {@code Future} will receive a callback in which it will
-   * attempt to cancel itself.
+   * <p>The returned {@code Future} attempts to keep its cancellation state in sync with that of
+   * the input future and that of the future returned by the chain function. That is, if the
+   * returned {@code Future} is cancelled, it will attempt to cancel the other two, and if either of
+   * the other two is cancelled, the returned {@code Future} will receive a callback in which it
+   * will attempt to cancel itself.
    *
    * <p>This method is similar to {@link java.util.concurrent.CompletableFuture#thenCompose} and
    * {@link java.util.concurrent.CompletableFuture#thenComposeAsync}. It can also serve some of the
@@ -317,10 +323,10 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    * java.util.concurrent.CompletableFuture#handleAsync} when used along with {@link #catching}.
    *
    * @param function A function to transform the result of this future to the result of the output
-   *     future
+   *                 future
    * @param executor Executor to run the function in.
    * @return A future that holds result of the function (if the input succeeded) or the original
-   *     input's failure (if not)
+   * input's failure (if not)
    */
   public final <T> FluentFuture<T> transformAsync(
       AsyncFunction<? super V, T> function, Executor executor) {
@@ -337,14 +343,14 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    *     queryFuture.transform(QueryResult::getRows, executor);
    * }</pre>
    *
-   * <p>When selecting an executor, note that {@code directExecutor} is dangerous in some cases. See
-   * the discussion in the {@link #addListener} documentation. All its warnings about heavyweight
-   * listeners are also applicable to heavyweight functions passed to this method.
+   * <p>When selecting an executor, note that {@code directExecutor} is dangerous in some cases.
+   * See the discussion in the {@link #addListener} documentation. All its warnings about
+   * heavyweight listeners are also applicable to heavyweight functions passed to this method.
    *
-   * <p>The returned {@code Future} attempts to keep its cancellation state in sync with that of the
-   * input future. That is, if the returned {@code Future} is cancelled, it will attempt to cancel
-   * the input, and if the input is cancelled, the returned {@code Future} will receive a callback
-   * in which it will attempt to cancel itself.
+   * <p>The returned {@code Future} attempts to keep its cancellation state in sync with that of
+   * the input future. That is, if the returned {@code Future} is cancelled, it will attempt to
+   * cancel the input, and if the input is cancelled, the returned {@code Future} will receive a
+   * callback in which it will attempt to cancel itself.
    *
    * <p>An example use of this method is to convert a serializable object returned from an RPC into
    * a POJO.
@@ -355,7 +361,7 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    * java.util.concurrent.CompletableFuture#handleAsync} when used along with {@link #catching}.
    *
    * @param function A Function to transform the results of this future to the results of the
-   *     returned future.
+   *                 returned future.
    * @param executor Executor to run the function in.
    * @return A future that holds result of the transformation.
    */
@@ -386,9 +392,9 @@ public abstract class FluentFuture<V> extends GwtFluentFutureCatchingSpecializat
    *     }, executor);
    * }</pre>
    *
-   * <p>When selecting an executor, note that {@code directExecutor} is dangerous in some cases. See
-   * the discussion in the {@link #addListener} documentation. All its warnings about heavyweight
-   * listeners are also applicable to heavyweight callbacks passed to this method.
+   * <p>When selecting an executor, note that {@code directExecutor} is dangerous in some cases.
+   * See the discussion in the {@link #addListener} documentation. All its warnings about
+   * heavyweight listeners are also applicable to heavyweight callbacks passed to this method.
    *
    * <p>For a more general interface to attach a completion listener, see {@link #addListener}.
    *
