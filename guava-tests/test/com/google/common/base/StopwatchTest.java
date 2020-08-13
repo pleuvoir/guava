@@ -24,6 +24,8 @@ import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.testing.FakeTicker;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.concurrent.TimeUnit;
 import junit.framework.TestCase;
 
 /**
@@ -175,6 +177,15 @@ public class StopwatchTest extends TestCase {
     assertEquals(Duration.ofNanos(999999), stopwatch.elapsed());
     ticker.advance(1);
     assertEquals(Duration.ofMillis(1), stopwatch.elapsed());
+  }
+
+
+  public void testPassedTime() throws InterruptedException {
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    TimeUnit.SECONDS.sleep(3);
+    //建议使用这种方式？
+    long elapsed = stopwatch.elapsed().get(ChronoUnit.SECONDS);
+    System.out.println(elapsed);
   }
 
   public void testToString() {

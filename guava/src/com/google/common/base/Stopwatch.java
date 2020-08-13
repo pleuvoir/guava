@@ -90,11 +90,10 @@ import java.util.concurrent.TimeUnit;
 @GwtCompatible(emulated = true)
 @SuppressWarnings("GoodTime") // lots of violations
 public final class Stopwatch {
-  private final Ticker ticker;
+  private final Ticker ticker;  //内部使用 System.nanoTime() 高精度
   private boolean isRunning;
-  private long elapsedNanos;
+  private long elapsedNanos; //支持中间停顿，等会可以再加上它
   private long startTick;
-
   /**
    * Creates (but does not start) a new stopwatch using {@link System#nanoTime} as its time source.
    *

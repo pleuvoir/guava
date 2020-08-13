@@ -16,6 +16,8 @@ Throwable failureCause();
 public void failed(State from, Throwable failure) {}
 
 Throwable cause
+
+propagate 传播
 ```
 
 
@@ -343,5 +345,25 @@ public String toString() {
 ```java
  SubscriberRegistry(EventBus bus) {
     this.bus = checkNotNull(bus);
+  }
+```
+
+
+### 枚举单例模式
+
+```java
+ // enum singleton pattern
+  private enum IdentityFunction implements Function<Object, Object> {
+    INSTANCE;
+
+    @Override
+    public @Nullable Object apply(@Nullable Object o) {
+      return o;
+    }
+
+    @Override
+    public String toString() {
+      return "Functions.identity()";
+    }
   }
 ```
